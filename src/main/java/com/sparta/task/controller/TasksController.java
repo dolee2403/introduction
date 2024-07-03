@@ -48,4 +48,10 @@ public class TasksController {
         TasksResponseDTO response = new TasksResponseDTO(tasks);
         return ResponseEntity.ok().body(response);
     }
+
+    @DeleteMapping("/{tasksId}")
+    public ResponseEntity<Void> deleteTasks(@PathVariable Long tasksId, @RequestBody TasksRequestDTO dto) {
+        tasksService.deleteTasks(tasksId, dto.getPassword());
+        return ResponseEntity.ok().build();
+    }
 }

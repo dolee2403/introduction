@@ -9,6 +9,7 @@ import org.springframework.scheduling.config.Task;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -34,18 +35,28 @@ public class TasksService {
 
     // 할 일 수정
     public Tasks updateTasks(Long tasksId, TasksRequestDTO dto) {
-        Tasks tasks = getTasks(tasksId);
-
-        // 비밀번호 체크
-        if(tasks.getPassword() != null
-                && tasks.getPassword().equals(dto.getPassword())) {
-            throw new IllegalArgumentException();
-        }
+        Tasks tasks = checkPWAndGetTasks(tasksId, dto.getPassword());
 
         tasks.setTitle(dto.getTitle());
         tasks.setContent(dto.getContent());
         tasks.setManager(dto.getManager());
 
         return tasksRepository.save(tasks);
+    }
+
+    private Tasks checkPWAndGetTasks(Long tasksId, String password) {
+        Tasks tasks = getTasks(tasksId);
+
+        // 비밀번호 체크
+        if(tasks.getPassword() != null
+                && !Objects.equals(tasks.getPassword(), password)) {
+            throw new IllegalArgumentException();
+        }
+        return tasks;
+    }
+
+    public void deleteTasks(Long tasksId, String password) {
+        Tasks tasks = checkPWAndGetTasks(tasksId, password);
+        tasksRepository.delete(tasks);
     }
 }
