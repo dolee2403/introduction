@@ -41,4 +41,11 @@ public class TasksController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok().body(response);
     }
+
+    @PutMapping("/{tasksId}")
+    public ResponseEntity<TasksResponseDTO> putTasks(@PathVariable Long tasksId, @RequestBody TasksRequestDTO dto) {
+        Tasks tasks = tasksService.updateTasks(tasksId, dto);
+        TasksResponseDTO response = new TasksResponseDTO(tasks);
+        return ResponseEntity.ok().body(response);
+    }
 }

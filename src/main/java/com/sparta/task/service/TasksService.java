@@ -31,4 +31,21 @@ public class TasksService {
     public List<Tasks> getTask() {
         return tasksRepository.findAll(Sort.by("createAt").descending());
     }
+
+    // 할 일 수정
+    public Tasks updateTasks(Long tasksId, TasksRequestDTO dto) {
+        Tasks tasks = getTasks(tasksId);
+
+        // 비밀번호 체크
+        if(tasks.getPassword() != null
+                && tasks.getPassword().equals(dto.getPassword())) {
+            throw new IllegalArgumentException();
+        }
+
+        tasks.setTitle(dto.getTitle());
+        tasks.setContent(dto.getContent());
+        tasks.setManager(dto.getManager());
+
+        return tasksRepository.save(tasks);
+    }
 }
