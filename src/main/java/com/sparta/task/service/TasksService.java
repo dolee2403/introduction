@@ -16,4 +16,10 @@ public class TasksService {
         var newTasks = dto.toEntity();
         return tasksRepository.save(newTasks);
     }
+
+    // 할 일 단건 조회
+    public Tasks getTasks(Long tasksId) {
+        return tasksRepository.findById(tasksId)
+                .orElseThrow(IllegalArgumentException::new);
+    }
 }

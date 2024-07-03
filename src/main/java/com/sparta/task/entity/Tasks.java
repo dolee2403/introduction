@@ -3,16 +3,18 @@ package com.sparta.task.entity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class Tasks {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "tasks_id", nullable = false)
-    private Long tasksid;
+    private Long tasksId;
 
     private String title;
 

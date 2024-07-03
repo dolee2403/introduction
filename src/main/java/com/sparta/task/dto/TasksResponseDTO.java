@@ -9,6 +9,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class TasksResponseDTO {
+
+    private Long tasksId;
+
     private String title;
 
     private String content;
@@ -18,6 +21,7 @@ public class TasksResponseDTO {
     private LocalDateTime createAt;
 
     public TasksResponseDTO(Tasks tasks) {
+        this.tasksId = tasks.getTasksId();
         this.title = tasks.getTitle();
         this.content = tasks.getContent();
         this.manager = tasks.getManager();
