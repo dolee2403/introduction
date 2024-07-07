@@ -20,16 +20,20 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtUtil jwtUtil;
 
+    // JwtUtil 객체를 생성자로 주입받음
     public JwtAuthenticationFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
-        setFilterProcessesUrl("/api/user/login");
+        setFilterProcessesUrl("/api/user/login"); // 로그인 요청 URL 설정
     }
 
+    // 로그인 시도 시 호출되는 메서드
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
+            // 요청의 입력 스트림에서 LoginRequestDto 객체를 읽어옴
             LoginRequestDto requestDto = new ObjectMapper().readValue(request.getInputStream(), LoginRequestDto.class);
 
+            // 인증 매니저를 통해 인증 시도
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(
                             requestDto.getUsername(),
@@ -43,18 +47,22 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         }
     }
 
+    // 인증 성공 시 호출되는 메서드
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) {
         String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
         UserRoleEnum role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getRole();
 
+        // JWT 토큰 생성
         String token = jwtUtil.createToken(username, role);
+        // 응답 헤더에 토큰 추가
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
     }
 
+    // 인증 실패 시 호출되는 메서드
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
+        // 인증 실패 시 HTTP 400 상태 코드 반환
         response.setStatus(400);
     }
-
 }

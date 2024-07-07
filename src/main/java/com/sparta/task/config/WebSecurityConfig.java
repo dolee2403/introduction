@@ -27,16 +27,19 @@ public class WebSecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
 
+    // 비밀번호 암호화를 위한 PasswordEncoder Bean 등록
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // AuthenticationManager를 Bean으로 등록
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
+    // JwtAuthenticationFilter를 Bean으로 등록
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
         JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil);
@@ -44,35 +47,39 @@ public class WebSecurityConfig {
         return filter;
     }
 
+    // JwtAuthorizationFilter를 Bean으로 등록
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
         return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
     }
 
+    // 보안 설정을 위한 SecurityFilterChain Bean 등록
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // CSRF 설정
+        // CSRF 보호 비활성화
         http.csrf((csrf) -> csrf.disable());
 
-        // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
+        // 세션 사용하지 않음
         http.sessionManagement((sessionManagement) ->
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );
 
+        // 요청 권한 설정
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
-                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // resources 접근 허용 설정
-                        .requestMatchers("/").permitAll() // 메인 페이지 요청 허가
-                        .requestMatchers("/api/user/**").permitAll() // '/api/user/'로 시작하는 요청 모두 접근 허가
-                        .anyRequest().authenticated() // 그 외 모든 요청 인증처리
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // resources 접근 허용
+                        .requestMatchers("/").permitAll() // 메인 페이지 접근 허용
+                        .requestMatchers("/api/user/**").permitAll() // '/api/user/'로 시작하는 요청 접근 허용
+                        .anyRequest().authenticated() // 그 외 모든 요청 인증 필요
         );
 
+        // 로그인 폼 설정
         http.formLogin((formLogin) ->
                 formLogin
                         .loginPage("/api/user/login-page").permitAll()
         );
 
-        // 필터 관리
+        // 필터 설정
         http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
