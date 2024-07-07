@@ -25,7 +25,7 @@ public class TasksResponseDTO {
     private String manager;
 
     // 작업 생성 일시
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     // Tasks 엔티티를 기반으로 DTO 객체 생성
     public TasksResponseDTO(Tasks tasks) {
@@ -33,5 +33,6 @@ public class TasksResponseDTO {
         this.title = tasks.getTitle();
         this.content = tasks.getContent();
         this.manager = tasks.getManager();
+        this.createdAt = tasks.getCreatedAt();
     }
 }

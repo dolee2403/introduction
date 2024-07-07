@@ -3,11 +3,15 @@ package com.sparta.task.controller;
 import com.sparta.task.dto.TasksRequestDTO;
 import com.sparta.task.dto.TasksResponseDTO;
 import com.sparta.task.entity.Tasks;
+import com.sparta.task.exception.GlobalExceptionHandler;
 import com.sparta.task.service.TasksService;
+import com.sparta.task.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,14 +21,24 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class TasksController {
 
-    // Task 관련 로직을 처리하는 서비스 클래스
     private final TasksService tasksService;
+    private final JwtUtil jwtUtil;
 
     // 새로운 Task를 생성하는 메서드 (POST 요청 처리)
     @PostMapping
-    public ResponseEntity<TasksResponseDTO> postTasks(@RequestBody TasksRequestDTO dto) {
+    public ResponseEntity<TasksResponseDTO> postTasks(@RequestBody TasksRequestDTO dto, HttpServletRequest request) {
+        // JWT 토큰을 헤더에서 가져와 유효성 검증
+        String token = jwtUtil.getJwtFromHeader(request);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            throw new GlobalExceptionHandler.TokenInvalidException();
+        }
+
+        // 토큰에서 사용자 정보 추출
+        Claims claims = jwtUtil.getUserInfoFromToken(token);
+        String username = claims.getSubject();
+
         // 클라이언트에서 받은 데이터를 이용해 새로운 Task 생성
-        Tasks tasks = tasksService.createTasks(dto);
+        Tasks tasks = tasksService.createTasks(dto, username);
         // 생성된 Task를 응답 DTO로 변환
         TasksResponseDTO response = new TasksResponseDTO(tasks);
         // HTTP 200 OK 응답과 함께 생성된 Task를 클라이언트에게 반환
@@ -57,9 +71,19 @@ public class TasksController {
 
     // 특정 ID의 Task를 업데이트하는 메서드 (PUT 요청 처리)
     @PutMapping("/{tasksId}")
-    public ResponseEntity<TasksResponseDTO> putTasks(@PathVariable Long tasksId, @RequestBody TasksRequestDTO dto) {
+    public ResponseEntity<TasksResponseDTO> putTasks(@PathVariable Long tasksId, @RequestBody TasksRequestDTO dto, HttpServletRequest request) {
+        // JWT 토큰을 헤더에서 가져와 유효성 검증
+        String token = jwtUtil.getJwtFromHeader(request);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            throw new GlobalExceptionHandler.TokenInvalidException();
+        }
+
+        // 토큰에서 사용자 정보 추출
+        Claims claims = jwtUtil.getUserInfoFromToken(token);
+        String username = claims.getSubject();
+
         // 클라이언트에서 받은 ID와 데이터를 이용해 Task 업데이트
-        Tasks tasks = tasksService.updateTasks(tasksId, dto);
+        Tasks tasks = tasksService.updateTasks(tasksId, dto, username);
         // 업데이트된 Task를 응답 DTO로 변환
         TasksResponseDTO response = new TasksResponseDTO(tasks);
         // HTTP 200 OK 응답과 함께 업데이트된 Task를 클라이언트에게 반환
@@ -68,10 +92,20 @@ public class TasksController {
 
     // 특정 ID의 Task를 삭제하는 메서드 (DELETE 요청 처리)
     @DeleteMapping("/{tasksId}")
-    public ResponseEntity<Void> deleteTasks(@PathVariable Long tasksId, @RequestBody TasksRequestDTO dto) {
-        // 클라이언트에서 받은 ID와 비밀번호를 이용해 Task 삭제
-        tasksService.deleteTasks(tasksId, dto.getPassword());
-        // HTTP 200 OK 응답 (내용 없음)을 클라이언트에게 반환
+    public ResponseEntity<Void> deleteTasks(@PathVariable Long tasksId, @RequestBody TasksRequestDTO dto, HttpServletRequest request) {
+        // JWT 토큰을 헤더에서 가져와 유효성 검증
+        String token = jwtUtil.getJwtFromHeader(request);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            throw new GlobalExceptionHandler.TokenInvalidException();
+        }
+
+        // 토큰에서 사용자 정보 추출
+        Claims claims = jwtUtil.getUserInfoFromToken(token);
+        String username = claims.getSubject();
+
+        // 클라이언트에서 받은 ID와 데이터를 이용해 Task 삭제
+        tasksService.deleteTasks(tasksId, dto.getPassword(), username);
+        // HTTP 200 OK 응답을 반환 (본문은 없음)
         return ResponseEntity.ok().build();
     }
 }
