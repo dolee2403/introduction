@@ -15,8 +15,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// '/v1.0/tasks' URL로 요청을 처리하는 컨트롤러 클래스
-@RequestMapping("/v1.0/tasks")
+// '/api/tasks' URL로 요청을 처리하는 컨트롤러 클래스
+@RequestMapping("/api/tasks")
 @RestController
 @AllArgsConstructor
 public class TasksController {

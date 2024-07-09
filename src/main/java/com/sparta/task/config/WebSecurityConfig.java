@@ -67,7 +67,7 @@ public class WebSecurityConfig {
         // 요청 권한 설정
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
-                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // resources 접근 허용
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // 리소스 접근 허용
                         .requestMatchers("/").permitAll() // 메인 페이지 접근 허용
                         .requestMatchers("/api/user/**").permitAll() // '/api/user/'로 시작하는 요청 접근 허용
                         .anyRequest().authenticated() // 그 외 모든 요청 인증 필요
@@ -76,12 +76,12 @@ public class WebSecurityConfig {
         // 로그인 폼 설정
         http.formLogin((formLogin) ->
                 formLogin
-                        .loginPage("/api/user/login-page").permitAll()
+                        .loginPage("/api/user/login-page").permitAll() // 로그인 페이지 접근 허용
         );
 
         // 필터 설정
-        http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class); // JWT 인가 필터 추가
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class); // JWT 인증 필터 추가
 
         return http.build();
     }

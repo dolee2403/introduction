@@ -16,9 +16,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // 데이터베이스에서 사용자 정보를 찾음
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Not Found " + username));
 
+        // UserDetailsImpl 객체를 반환
         return new UserDetailsImpl(user);
     }
 }
